@@ -80,13 +80,24 @@
 #' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
 #'
 
+#' Parses the input from readLines; each line will read as a string,
+#' stored in a vector.
+#'
+#' It loops through each entry, adding the numbers to a vector until
+#' it reachs a blank line.
+#'
+#' When a blank line is reached, it adds the vector of numbers before it
+#' as an entry in a list, then resets the vector and continues.
 parse_input <- function(input) {
+    # Initialise empty list + vector
     out <- list()
     vec <- c()
     for(i in 1:length(input)) {
+        # If not blank, add number to vec
         if(input[i] != "") {
             vec <- append(vec, input[i])
         } else if(input[i] == "") {
+            # If blank, add vector to list and reset the numbers
             out <- append(out, list(vec))
             vec <- c()
         }
@@ -114,6 +125,7 @@ f01a <- function(x) {
 #' @export
 f01b <- function(x) {
     x |>
+        parse_input() |>
         purrr::map(as.numeric) |>
         purrr::map(sum) |>
         unlist() |>
