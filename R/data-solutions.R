@@ -3,8 +3,8 @@
 aoc_solutions <- list(
   day01a = 67622,
   day01b = 201491,
-  day02a = NA,
-  day02b = NA,
+  day02a = 8392,
+  day02b = 10116,
   day03a = NA,
   day03b = NA,
   day04a = NA,
