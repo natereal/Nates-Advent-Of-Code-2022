@@ -70,20 +70,17 @@ map(root, .f = ~ {
 })
 
 commands <- test
-root <- list()
-currently_listing <- FALSE
-levels <- 0
-target_list_name <- c()
+tree <- list()
 while(!is.null(commands)) {
-
-    if(commands[1] == "$ cd /") {
+    current <- commands[1]
+    if(word(current, 1, 2) == "$ cd") {
+        dir <- word(current, 3)
+        tree <- list(0)
+        names(tree) <- dir
         commands <- commands[-1]
-        isRoot <- TRUE
-    } else if(commands[1] == "$ ls"){
+    } else if(word(current, 1, 2) == "$ ls") {
+        commands <- commands[-1]
         L <- list()
-        # delete '$ ls'
-        commands <- commands[-1]
-
         while(str_sub(commands[1], 1, 1) != "$") {
             current <- commands[1]
             current <- str_split(current, pattern = " ") |>
@@ -97,13 +94,50 @@ while(!is.null(commands)) {
             names(L)[length(L)] <- current[2]
             commands <- commands[-1]
         }
+        tree <- assign_in(tree, dir, L)
+    }
+    # commands <- commands[-1]
+}
+
+# =================================================================================
+commands <- test
+root <- list()
+currently_listing <- FALSE
+levels <- 0
+target_list_name <- c()
+L <- list()
+while(!is.null(commands)) {
+
+    if(commands[1] == "$ cd /") {
+        commands <- commands[-1]
+        isRoot <- TRUE
+    } else if(commands[1] == "$ ls"){
+        L <- list()
+        # delete '$ ls'
+        commands <- commands[-1]
+
+        char <- str_sub(commands[1], 1, 1)
+        while(char != "$") {
+            current <- commands[1]
+            current <- str_split(current, pattern = " ") |>
+                unlist()
+            if(current[1] == "dir") {
+                L <- append(L, list(0))
+            } else {
+                val <- as.numeric(current[1])
+                L <- append(L, list(val))
+            }
+            names(L)[length(L)] <- current[2]
+            commands <- commands[-1]
+            char <- str_sub(commands[1], 1, 1)
+            if(is.na(char)) char <- 0
+        }
 
         if(isRoot) {
             root <- L
             isRoot <- FALSE
         } else {
-            target <- tail(target_list_name, 1)
-            root <- purrr::assign_in(root, target, L)
+            root[[target_list_name]] <- L
         }
         # when we get to this point, the top entry of the
         # commands list starts with $
@@ -114,7 +148,7 @@ while(!is.null(commands)) {
         if(current[3] != "..") {
             levels <- levels + 1
             target_list_name <- c(target_list_name, current[3])
-            LL <- L
+            # LL <- L
         } else if(current[3] == "..") {
             levels <- levels - 1
             # deletes last entry
@@ -123,7 +157,7 @@ while(!is.null(commands)) {
         commands <- commands[-1]
     }
 }
-
+# =================================================================================
 
 # manual set list 
 root <- list()
