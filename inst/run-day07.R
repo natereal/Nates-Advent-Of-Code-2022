@@ -70,36 +70,69 @@ map(root, .f = ~ {
 })
 
 commands <- test
-
 root <- list()
 currently_listing <- FALSE
+levels <- 0
+target_list_name <- c()
 while(!is.null(commands)) {
-    current_command <- commands[1] |>
-        str_split(pattern = " ", simplify = TRUE) |>
-        as.vector()
 
-    if(current_command[1] == "$") {
-        if(current_command[2] == "cd") {
-            # create directory 
-            # with name 
-            # current_command[3]
-            root$name <- current_command[3]
-            root$type <- "dir"
-            root$size <- NA
-        } else if(current_command[2] == "ls") {
-            currently_listing <- TRUE
+    if(commands[1] == "$ cd /") {
+        commands <- commands[-1]
+        isRoot <- TRUE
+    } else if(commands[1] == "$ ls"){
+        L <- list()
+        # delete '$ ls'
+        commands <- commands[-1]
+
+        while(str_sub(commands[1], 1, 1) != "$") {
+            current <- commands[1]
+            current <- str_split(current, pattern = " ") |>
+                unlist()
+            if(current[1] == "dir") {
+                L <- append(L, list(0))
+            } else {
+                val <- as.numeric(current[1])
+                L <- append(L, list(val))
+            }
+            names(L)[length(L)] <- current[2]
+            commands <- commands[-1]
         }
-    }
 
-    commands <- commands[-1]
+        if(isRoot) {
+            root <- L
+            isRoot <- FALSE
+        } else {
+            target <- tail(target_list_name, 1)
+            root <- purrr::assign_in(root, target, L)
+        }
+        # when we get to this point, the top entry of the
+        # commands list starts with $
+    } else {
+        current <- commands[1]
+        current <- str_split(current, pattern = " ") |>
+            unlist()
+        if(current[3] != "..") {
+            levels <- levels + 1
+            target_list_name <- c(target_list_name, current[3])
+            LL <- L
+        } else if(current[3] == "..") {
+            levels <- levels - 1
+            # deletes last entry
+            target_list_name <- head(target_list_name, -1)
+        }
+        commands <- commands[-1]
+    }
 }
 
 
-
+# manual set list 
 root <- list()
+root$a <- list()
 root$"b.txt" <- 14848514
 root$"c.dat" <- 8504156
+root$d <- list()
 
+root$a$e <- list()
 root$a$f <- 29116
 root$a$g <- 2557
 root$a$"h.lst" <- 62596
@@ -110,8 +143,8 @@ root$d$j <- 4060174
 root$d$"d.log" <- 8033020
 root$d$"d.ext" <- 5626152
 root$d$k <- 7214296
-
 root
+# ----------------------
 
 my_reduce <- function(lis) {
     reduce(lis, .f = ~ {
@@ -148,24 +181,30 @@ isFile <- function(obj) {
     length(obj) == 1 & is.numeric(obj)
 }
 
+dir_sizes <- list()
+
 # recursive function
 get_size <- function(tree, this_list_name) {
-
-    # print(deparse(substitute(tree)))
     if(isFile(tree)) {
         return(tree)
     } else {
         size <- 0
-        # print(names(tree))
         for(i in seq_along(1:length(tree))) {
             size <- size + get_size(tree[[i]], this_list_name = names(tree)[i])
         }
-        # print(paste(deparse(substitute(tree)), "has size", size))
-        print(this_list_name)
-        print(size)
     }
+    print(this_list_name)
+    print(size)
+    dir_sizes <<- append(dir_sizes, size)
+    LAST <- length(dir_sizes)
+    names(dir_sizes)[LAST] <<- this_list_name
     return(size)
 }
 
 get_size(root, this_list_name = "root")
 
+dir_sizes 
+values <- dir_sizes |>
+    unlist() 
+
+sum(values[values < 100000])
