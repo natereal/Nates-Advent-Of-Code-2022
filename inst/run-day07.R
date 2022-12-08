@@ -1,4 +1,3 @@
-library(adventofcode22)
 library(tidyverse)
 x <- readLines("./inst/input07.txt")
 
@@ -34,182 +33,87 @@ test <- c(
    "7214296 k"
 )
 
-dir <- list(type = "dir", size = NA)
+parse_input <- function(input) {
+    commands <- input
+    root <- list()
+    # currently_listing <- FALSE
+    target_list_name <- c()
+    i <- 1
+    while(i <= length(commands)) {
 
-basefile <- function(size) {
-    list(type = "file", size = size)
-}
+        if(commands[i] == "$ cd /") {
+            # commands <- commands[-1]
+            i <- i + 1
+            isRoot <- TRUE
+        } else if(commands[i] == "$ ls"){
+            L <- list()
+            # delete '$ ls'
+            # commands <- commands[-1]
+            i <- i + 1
+            char <- str_sub(commands[i], 1, 1)
+            # if(is.na(char)) char <- 0
+            while(char != "$") {
+                current <- commands[i]
+                current <- str_split(current, pattern = " ") |>
+                    unlist()
+                if(current[1] == "dir") {
+                    L <- append(L, list(0))
+                } else {
+                    val <- as.numeric(current[1])
+                    L <- append(L, list(val))
+                }
+                names(L)[length(L)] <- current[2]
+                # commands <- commands[-1]
+                i <- i + 1
+                char <- str_sub(commands[i], 1, 1)
+                if(is.na(char)) break
+            }
 
-root = list(
-    info = dir
-)
-
-root
-
-assign("a", list(info = dir))
-root$a <- list(info = dir)
-root$b <- list(info = basefile(14848514))
-root$c <- list(info = basefile(8504156))
-root$d <- list(info = dir)
-str(root)
-root$a$e <- list(info = dir)
-root$a$f <- list(info = basefile(29116))
-root$a$g <- list(info = basefile(2557))
-root$a$h <- list(info = basefile(62596))
-root$a$e$i <- list(info = basefile(584))
-root$d$j <- list(info = basefile(4060174))
-root$d$dlog <- list(info = basefile(8033020))
-root$d$dext <- list(info = basefile(5626152))
-root$d$k <- list(info = basefile(7214296))
-
-str(root)
-map(root, .f = ~ {
-    if(.x$info == "dir") {
-
-    }
-})
-
-commands <- test
-tree <- list()
-while(!is.null(commands)) {
-    current <- commands[1]
-    if(word(current, 1, 2) == "$ cd") {
-        dir <- word(current, 3)
-        tree <- list(0)
-        names(tree) <- dir
-        commands <- commands[-1]
-    } else if(word(current, 1, 2) == "$ ls") {
-        commands <- commands[-1]
-        L <- list()
-        while(str_sub(commands[1], 1, 1) != "$") {
-            current <- commands[1]
+            if(isRoot) {
+                root <- L
+                isRoot <- FALSE
+            } else {
+                root[[target_list_name]] <- L
+            }
+            # when we get to this point, the top entry of the
+            # commands list starts with $
+        } else {
+            current <- commands[i]
             current <- str_split(current, pattern = " ") |>
                 unlist()
-            if(current[1] == "dir") {
-                L <- append(L, list(0))
-            } else {
-                val <- as.numeric(current[1])
-                L <- append(L, list(val))
+            if(current[3] != "..") {
+                target_list_name <- c(target_list_name, current[3])
+            } else if(current[3] == "..") {
+                # deletes last entry
+                target_list_name <- head(target_list_name, -1)
             }
-            names(L)[length(L)] <- current[2]
-            commands <- commands[-1]
+            # commands <- commands[-1]
+            i <- i + 1
         }
-        tree <- assign_in(tree, dir, L)
     }
-    # commands <- commands[-1]
+    return(root)
 }
 
-# =================================================================================
-commands <- test
-root <- list()
-currently_listing <- FALSE
-levels <- 0
-target_list_name <- c()
-L <- list()
-while(!is.null(commands)) {
+# # manual set list 
+# root <- list()
+# root$a <- list()
+# root$"b.txt" <- 14848514
+# root$"c.dat" <- 8504156
+# root$d <- list()
 
-    if(commands[1] == "$ cd /") {
-        commands <- commands[-1]
-        isRoot <- TRUE
-    } else if(commands[1] == "$ ls"){
-        L <- list()
-        # delete '$ ls'
-        commands <- commands[-1]
+# root$a$e <- list()
+# root$a$f <- 29116
+# root$a$g <- 2557
+# root$a$"h.lst" <- 62596
 
-        char <- str_sub(commands[1], 1, 1)
-        while(char != "$") {
-            current <- commands[1]
-            current <- str_split(current, pattern = " ") |>
-                unlist()
-            if(current[1] == "dir") {
-                L <- append(L, list(0))
-            } else {
-                val <- as.numeric(current[1])
-                L <- append(L, list(val))
-            }
-            names(L)[length(L)] <- current[2]
-            commands <- commands[-1]
-            char <- str_sub(commands[1], 1, 1)
-            if(is.na(char)) char <- 0
-        }
+# root$a$e$i <- 584
 
-        if(isRoot) {
-            root <- L
-            isRoot <- FALSE
-        } else {
-            root[[target_list_name]] <- L
-        }
-        # when we get to this point, the top entry of the
-        # commands list starts with $
-    } else {
-        current <- commands[1]
-        current <- str_split(current, pattern = " ") |>
-            unlist()
-        if(current[3] != "..") {
-            levels <- levels + 1
-            target_list_name <- c(target_list_name, current[3])
-            # LL <- L
-        } else if(current[3] == "..") {
-            levels <- levels - 1
-            # deletes last entry
-            target_list_name <- head(target_list_name, -1)
-        }
-        commands <- commands[-1]
-    }
-}
-# =================================================================================
-
-# manual set list 
-root <- list()
-root$a <- list()
-root$"b.txt" <- 14848514
-root$"c.dat" <- 8504156
-root$d <- list()
-
-root$a$e <- list()
-root$a$f <- 29116
-root$a$g <- 2557
-root$a$"h.lst" <- 62596
-
-root$a$e$i <- 584
-
-root$d$j <- 4060174
-root$d$"d.log" <- 8033020
-root$d$"d.ext" <- 5626152
-root$d$k <- 7214296
-root
-# ----------------------
-
-my_reduce <- function(lis) {
-    reduce(lis, .f = ~ {
-        if(is.null(.y)) {
-            cat(.x)
-        }
-
-        if(is.numeric(.x)) {
-            num1 <- .x
-        } else {
-            num1 <- my_reduce(.x)
-        }
-        if(is.numeric(.y)) {
-            num2 <- .y
-        } else {
-            num2 <- my_reduce(.y)
-        }
-        print(num1 + num2)
-        return(num1 + num2)
-    })
-}
-
-my_reduce(root)
-
-lengths(root)
-# length 1 but is dir:
-length(root$a$e)
-is.numeric(root$a$e)
-# length 1 and numeric means it's a file
-length(root$a$e$i)
-is.numeric(root$a$e$i)
+# root$d$j <- 4060174
+# root$d$"d.log" <- 8033020
+# root$d$"d.ext" <- 5626152
+# root$d$k <- 7214296
+# root
+# # ----------------------
 
 isFile <- function(obj) {
     length(obj) == 1 & is.numeric(obj)
@@ -227,8 +131,8 @@ get_size <- function(tree, this_list_name) {
             size <- size + get_size(tree[[i]], this_list_name = names(tree)[i])
         }
     }
-    print(this_list_name)
-    print(size)
+    # print(this_list_name)
+    # print(size)
     dir_sizes <<- append(dir_sizes, size)
     LAST <- length(dir_sizes)
     names(dir_sizes)[LAST] <<- this_list_name
@@ -242,3 +146,35 @@ values <- dir_sizes |>
     unlist() 
 
 sum(values[values < 100000])
+
+solve <- function(input) {
+    dir_sizes <- list()
+    input |>
+        parse_input() |>
+        get_size(this_list_name = "root")
+    print(dir_sizes)
+    values <- dir_sizes |>
+        unlist()
+
+    return(sum(values[values < 100000]))
+}
+
+solve(test)
+parse_input(test) |>
+    get_size(this_list_name = "root")
+
+###
+dir_sizes <- list()
+readLines("inst/input07.txt") |>
+    parse_input() |>
+    get_size(this_list_name = "root")
+
+dir_sizes 
+values <- dir_sizes |>
+    unlist() 
+
+sum(values[values < 100000])
+
+unused <- 70000000 - values["root"]
+target_space <- 30000000 - unused
+min(values[values > target_space])
