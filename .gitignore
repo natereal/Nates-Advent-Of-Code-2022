@@ -3,5 +3,4 @@
 .RData
 .Ruserdata
 .aoccookie
-renv/*
 renv/activate.R
