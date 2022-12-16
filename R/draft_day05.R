@@ -12,6 +12,32 @@ test <- c(
 
 test
 
+char <- function(str, n) {
+    stringr::str_sub(str, n, n)
+}
+
+# fo for i in nrows
+# put each result in row of matrix
+# transpose matrix, and reverse to get stack?
+vec <- test[3]
+N <- 3
+L <- nchar(vec)
+check <- 3 * N + (N-1) == L
+
+crate <- vector(mode = "character", length = N)
+for(i in 1:N) {
+    #' 1:3 + (i-1)*3 + (i-1)*1
+    first <- 1 + (i-1)*4
+    last  <- 3 + (i-1)*4
+    sub <- stringr::str_sub(vec, first, last)
+    if(sub == "   ") {
+        crate[i] <- ""
+    } else if(str_detect(sub, "[[:alpha:]]")) {
+        crate[i] <- char(sub, 2)
+    }
+}
+crate
+
 readLines("inst/input05.txt")
 readr::read_file("inst/input05.txt")
 
