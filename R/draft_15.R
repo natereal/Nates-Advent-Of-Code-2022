@@ -29,7 +29,7 @@ process_input <- function(input) {
     x <- cbind(x, d)
 
     return(x)
-}   
+}
 
 man_dist <- function(x) {
     x1 <- x[1]
@@ -47,14 +47,14 @@ find_marked <- function(x, target = 10, sort = FALSE, remove = TRUE) {
     for(i in seq_len(nrow(x))) {
         coords <- x[i, ]
         #' target row is row 10
-        #' given by sy 
+        #' given by sy
         #' check row 10 is within d of s
         is_within_target <- abs(coords["sy"] - target) < coords["d"]
         # is_within_target <- TRUE
         #' so at least, [sx, target] will be marked (no beacon)
         if(is_within_target) {
             to_be_marked <- coords["sx"]
-            #' based on the distance, we +1/-1 to this to make a range 
+            #' based on the distance, we +1/-1 to this to make a range
             #' get distance of row to s;
             r <- coords["d"] - abs(coords["sy"] - target)
             marked <- c(marked, (to_be_marked - r):(to_be_marked + r))
@@ -66,7 +66,7 @@ find_marked <- function(x, target = 10, sort = FALSE, remove = TRUE) {
                 # check if x coord of any of these has been marked
                 beacons_on_target_row
                 ind <- marked %in% beacons_on_target_row["bx"]
-                
+
                 marked <- marked[!ind]
 
                 # sensors:
@@ -80,7 +80,7 @@ find_marked <- function(x, target = 10, sort = FALSE, remove = TRUE) {
     }
 
     if(sort) marked <- sort.int(marked)
-    
+
     return(marked)
 }
 
@@ -100,13 +100,13 @@ find_unmarked <- function(x, target, max = 4000000) {
     for(i in seq_len(nrow(x))) {
         coords <- x[i, ]
         #' target row is row 10
-        #' given by sy 
+        #' given by sy
         #' check row 10 is within d of s
         is_within_target <- abs(coords["sy"] - target) < coords["d"]
         #' so at least, [sx, target] will be marked (no beacon)
         if(is_within_target) {
             to_be_marked <- coords["sx"]
-            #' based on the distance, we +1/-1 to this to make a range 
+            #' based on the distance, we +1/-1 to this to make a range
             #' get distance of row to s;
             r <- coords["d"] - abs(coords["sy"] - target)
             # marked <- c(marked, (to_be_marked - r):(to_be_marked + r))
@@ -118,7 +118,7 @@ find_unmarked <- function(x, target, max = 4000000) {
             if(length(marked) == 0) return(NULL)
         }
     }
-    
+
     return(marked)
 }
 
@@ -130,7 +130,7 @@ find_unmarked <- function(x, target, max = 4000000) {
 # microbenchmark::microbenchmark(
 #     x = {
 #         #to_be_marked <- coords["sx"]
-#             #' based on the distance, we +1/-1 to this to make a range 
+#             #' based on the distance, we +1/-1 to this to make a range
 #             #' get distance of row to s;
 #         r <- abs(coords["sy"] - target) - coords["d"]
 #         tempmarked <- c(marked, (to_be_marked - r):(to_be_marked + r))
@@ -141,7 +141,7 @@ find_unmarked <- function(x, target, max = 4000000) {
 # microbenchmark::microbenchmark(
 #     x = {
 #         #to_be_marked <- coords["sx"]
-#             #' based on the distance, we +1/-1 to this to make a range 
+#             #' based on the distance, we +1/-1 to this to make a range
 #             #' get distance of row to s;
 #         r <- abs(coords["sy"] - target) - coords["d"]
 #         tempmarked <- cmarked[cmarked < to_be_marked - r]
@@ -222,12 +222,12 @@ find_boundary <- function(coord, MAX = 4000000) {
         points <- bind_rows(points, c(x_left, y), c(x_right, y))
 
         # y = 2757325
-        # ymax = 2935757 
+        # ymax = 2935757
         # initial delta 1
         # N = coord["sy"] - y
         # range <- 1:N
         # x <- c(x_base - range, x_base + range)
-        # points 
+        # points
 
     }
     while(y < max_y_loop) {
@@ -246,11 +246,12 @@ find_boundary <- function(coord, MAX = 4000000) {
         distinct()
 }
 
+
 # ==================================================
 # STEP 2
 boundaries <- apply(x, 1, FUN = find_boundary, MAX = 4000000)
 
-microbenchmark::microbenchmark(time = { find_boundary(x[1,], MAX = 4000000)}, times = 1L)
+microbenchmark::microbenchmark(time = { find_boundary(x[1,], MAX = 20)}, times = 1L)
 # ==================================================
 
 d1 <- boundaries[[1]]
@@ -333,7 +334,7 @@ microbenchmark::microbenchmark(time = {
 }, times = 1L)
 
 
-points <- tibble("sx" = x_base, "sy" = top_y)  
+points <- tibble("sx" = x_base, "sy" = top_y)
 microbenchmark::microbenchmark(
     time = {
         i = 1
