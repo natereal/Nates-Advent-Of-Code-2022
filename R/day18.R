@@ -147,7 +147,7 @@ get_faces <- function(input) {
 
 neighbour_points <- get_faces(input)
 input <- as_tibble(input)
-
+colnames(input) <- c("X", "Y", "Z")
 intersection <- intersect(neighbour_points, input)
 # setdiff(neighbour_points, intersection)
 # setdiff(neighbour_points, x)
@@ -156,13 +156,13 @@ intersection <- intersect(neighbour_points, input)
 # nrow(setdiff(neighbour_points, x))
 
 covered_points <- intersection |>
-    mutate(slot = paste0(V1, ".", V2, ".", V3)) |>
+    mutate(slot = paste0(X, ".", Y, ".", Z)) |>
     pull(slot)
 
 neighbour_points |>
-    group_by(V1, V2, V3) |>
+    group_by(X, Y, Z) |>
     count() |>
-    mutate(slot = paste0(V1, ".", V2, ".", V3)) |>
+    mutate(slot = paste0(X, ".", Y, ".", Z)) |>
     filter(!slot %in% covered_points) |>
     ungroup() |>
     summarise(total_faces = sum(n))
@@ -197,7 +197,7 @@ input |>
     summarise_all(list("min" = min, "max" = max))
 
 all_points <- expand.grid(1:20, 1:20, 1:20)
-colnames(all_points) <- c("V1", "V2", "V3")
+colnames(all_points) <- c("X", "Y", "Z")
 p <- as_tibble(all_points)
 empty_points <- setdiff(p, input)
 
@@ -209,9 +209,9 @@ for(i in 1:nrow(empty_points)) {
     z <- as.numeric(empty_points[i, 3])
 
     touching <- tibble(
-        V1 = c(x-1, x+1, x, x, x, x),
-        V2 = c(y, y, y-1, y+1, y, y),
-        V3 = c(z, z, z, z, z-1, z+1)
+        X = c(x-1, x+1, x, x, x, x),
+        Y = c(y, y, y-1, y+1, y, y),
+        Z = c(z, z, z, z, z-1, z+1)
     )
 
     empty_intersect <- intersect(touching, input)
@@ -222,14 +222,14 @@ for(i in 1:nrow(empty_points)) {
 }
 
 out <- neighbour_points |>
-    group_by(V1, V2, V3) |>
+    group_by(X, Y, Z) |>
     count() |>
-    mutate(slot = paste0(V1, ".", V2, ".", V3)) |>
+    mutate(slot = paste0(X, ".", Y, ".", Z)) |>
     filter(!slot %in% covered_points) |>
     ungroup()
 
 empty_slot_ids <- empty_points[empty_ids, ] |>
-    mutate(slot = paste0(V1, ".", V2, ".", V3)) |>
+    mutate(slot = paste0(X, ".", Y, ".", Z)) |>
     pull(slot)
 
 out |>
@@ -275,7 +275,7 @@ grid <- grid |>
     make_id()
 
 magma_coords <- input |>
-    rename(X = V1, Y = V2, Z = V3) |>
+    rename(X = X, Y = Y, Z = Z) |>
     make_id()
 
 list_col <- grid |>

@@ -3,7 +3,7 @@ Type: Package
 Title: Nate's Advent of Code Solutions 2022
 Version: 0.1.0
 Author: Nathan Doyle
-Maintainer: Nathan Doyle <oduilln>
+Maintainer: Nathan Doyle <oduilln@tcd.ie>
 Description: Nate's Advent of Code Solutions 2022
 License: 
 Encoding: UTF-8
